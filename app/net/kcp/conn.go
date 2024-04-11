@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/orbit-w/golib/bases/packet"
-	"github.com/orbit-w/ogateway/app/net/codec"
+	gnetwork "github.com/orbit-w/golib/modules/net/network"
 	"github.com/orbit-w/ogateway/app/net/onet"
 	"io"
 	"log"
@@ -28,15 +28,17 @@ type IAgent interface {
 type KcpConn struct {
 	state  atomic.Uint32
 	conn   net.Conn
-	codec  *codec.Codec
+	codec  *gnetwork.Codec
 	ctx    context.Context
 	cancel context.CancelFunc
 	agent  IAgent
 }
 
 type ConnOptions struct {
+	IsGzip            bool
 	MaxIncomingPacket uint32
 	Ctx               context.Context
+	ReadTimeout       time.Duration
 }
 
 func NewKcpConn(_conn net.Conn, _agent IAgent, op ConnOptions) *KcpConn {
@@ -48,7 +50,7 @@ func NewKcpConn(_conn net.Conn, _agent IAgent, op ConnOptions) *KcpConn {
 	cCtx, cancel := context.WithCancel(ctx)
 	kc := &KcpConn{
 		conn:   _conn,
-		codec:  codec.NewCodec(op.MaxIncomingPacket, false),
+		codec:  gnetwork.NewCodec(op.MaxIncomingPacket, op.IsGzip, op.ReadTimeout),
 		ctx:    cCtx,
 		cancel: cancel,
 		agent:  _agent,
@@ -58,12 +60,17 @@ func NewKcpConn(_conn net.Conn, _agent IAgent, op ConnOptions) *KcpConn {
 	return kc
 }
 
-func (kc *KcpConn) Send(data []byte) (err error) {
+func (kc *KcpConn) Send(data []byte) error {
+	out, err := kc.codec.EncodeBodyRaw(data)
+	if err != nil {
+		return err
+	}
+	defer out.Return()
 	if err = kc.conn.SetWriteDeadline(time.Now().Add(WriteTimeout)); err != nil {
 		return err
 	}
-	_, err = kc.conn.Write(data)
-	return
+	_, err = kc.conn.Write(out.Data())
+	return err
 }
 
 func (kc *KcpConn) Close() error {

@@ -45,6 +45,7 @@ func (kcpS *KcpServer) Serve(addr string) error {
 		conn := okcp.NewKcpConn(_conn, oAgent, okcp.ConnOptions{
 			Ctx:               ctx,
 			MaxIncomingPacket: maxIncomingPacket,
+			ReadTimeout:       network.ReadTimeout,
 		})
 		defer func() {
 			_ = conn.Close()

@@ -25,15 +25,16 @@ import (
 */
 
 var (
-	once       sync.Once
-	gs         *agent_stream.Server
-	configPath = flag.String("config", "../../configs", "config file path")
+	once             sync.Once
+	gs               *agent_stream.Server
+	configPath       = flag.String("config", "../../configs", "config file path")
+	streamServerHost = "127.0.0.1:9900"
 )
 
-func ServeTest(handle func(stream agent_stream.IStream) error) {
+func RunAgentStreamServer(handle func(stream agent_stream.IStream) error) {
 	once.Do(func() {
 		gs = new(agent_stream.Server)
-		if err := gs.Serve(viper.GetString(oconfig.TagHost), handle); err != nil {
+		if err := gs.Serve(streamServerHost, handle); err != nil {
 			panic(err)
 		}
 	})
@@ -51,13 +52,13 @@ func Test_Run(t *testing.T) {
 		_ = server.Stop()
 	}()
 
-	ServeTest(func(stream agent_stream.IStream) error {
+	RunAgentStreamServer(func(stream agent_stream.IStream) error {
 		for {
 			in, err := stream.Recv()
 			if err != nil {
 				break
 			}
-			fmt.Printf("Server recv: %s", string(in))
+			fmt.Printf("agent_stream server recv: %s\n", string(in))
 			err = stream.Send([]byte("hello, client"))
 			if err != nil {
 				t.Error(err)
@@ -78,9 +79,6 @@ func NewClient(t *testing.T) net.Conn {
 	// 创建KCP客户端
 	conn, err := kcp.DialWithOptions(viper.GetString(oconfig.TagHost), nil, 10, 3)
 	assert.NoError(t, err)
-	defer func() {
-		_ = conn.Close()
-	}()
 
 	// 向服务器发送数据
 	codec := gnetwork.NewCodec(gnetwork.MaxIncomingPacket, false, time.Second*60)
@@ -101,13 +99,16 @@ func NewClient(t *testing.T) net.Conn {
 				}
 
 				fmt.Printf("Error reading from server: %s", err.Error())
+				break
 			}
 
-			fmt.Printf("Received from server: %s\n", string(in.Data()))
+			fmt.Println("Received from server: ", string(in.Remain()))
 		}
 	}()
 
-	out, err := codec.EncodeBodyRaw([]byte("Hello KCP Server!"))
+	w := packet.Writer()
+	w.WriteBytes32([]byte("Hello KCP Server!")) // 写入数据
+	out, err := codec.EncodeBody(w)
 	assert.NoError(t, err)
 	_, err = conn.Write(out.Data())
 	assert.NoError(t, err)

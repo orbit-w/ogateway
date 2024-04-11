@@ -59,7 +59,6 @@ func (a *Agent) Proxy(out []byte) error {
 			return err
 		}
 		a.Authed = true
-		return nil
 	}
 	return a.stream.Send(out)
 }
@@ -138,16 +137,5 @@ func (a *Agent) safeReturn(err error) {
 
 func (a *Agent) handleMsg(in packet.IPacket) error {
 	defer in.Return()
-	p, err := in.ReadInt8()
-	if err != nil {
-		return err
-	}
-
-	switch p {
-	case PatternKick:
-		_ = a.Close()
-		return nil
-	default:
-		return a.sender.Send(in.Remain())
-	}
+	return a.sender.Send(in.Data())
 }
