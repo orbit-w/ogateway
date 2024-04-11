@@ -22,7 +22,7 @@ import (
 
 type IAgent interface {
 	Close() error
-	Send(out packet.IPacket) error
+	Proxy(out []byte) error
 }
 
 type KcpConn struct {
@@ -120,8 +120,7 @@ func (kc *KcpConn) OnData(data packet.IPacket) error {
 	defer data.Return()
 	for len(data.Remain()) > 0 {
 		if bytes, err := data.ReadBytes32(); err == nil {
-			reader := packet.Reader(bytes)
-			_ = kc.agent.Send(reader)
+			_ = kc.agent.Proxy(bytes)
 		}
 	}
 	return nil

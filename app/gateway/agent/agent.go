@@ -3,7 +3,7 @@ package agent
 import (
 	"fmt"
 	"github.com/orbit-w/golib/bases/packet"
-	"github.com/orbit-w/golib/core/network"
+	"github.com/orbit-w/golib/modules/net/agent_stream"
 	"github.com/orbit-w/ogateway/app/net/onet"
 	"io"
 	"log"
@@ -27,13 +27,15 @@ type IStream interface {
 }
 
 type Agent struct {
-	Authed bool
-	Idx    uint64 //increment id
-	Uuid   int64  //agent id
-	state  atomic.Uint32
-	conn   net.Conn
-	sender ISender
-	stream *Stream
+	Authed     bool
+	Idx        uint64 //increment id
+	Uuid       int64  //agent id
+	remoteAddr string
+	state      atomic.Uint32
+	conn       net.Conn
+	cli        agent_stream.IStreamClient
+	sender     ISender
+	stream     agent_stream.IStream
 }
 
 func NewAgent(_Idx uint64, _conn net.Conn) *Agent {
@@ -47,7 +49,7 @@ func (a *Agent) BindSender(s ISender) {
 	a.sender = s
 }
 
-func (a *Agent) Send(out packet.IPacket) error {
+func (a *Agent) Proxy(out []byte) error {
 	if !a.Authed {
 		//登陆验证第一个消息包
 		if err := a.auth(); err != nil {
@@ -75,26 +77,25 @@ func (a *Agent) Close() error {
 }
 
 func (a *Agent) dial() error {
-	a.stream = NewStream()
-	if err := a.stream.Dial(); err != nil {
+	cli := agent_stream.NewClient(a.remoteAddr)
+	stream, err := cli.Stream()
+	if err != nil {
 		return err
 	}
+	a.stream = stream
 	go a.handleLoop()
 	return nil
 }
 
 func (a *Agent) auth() error {
+	a.remoteAddr = remoteAddr
 	return nil
 }
 
 func (a *Agent) handleLoop() {
 	var (
-		err     error
-		headBuf = headPool.Get().(*network.Buffer)
-		bodyBuf = bodyPool.Get().(*network.Buffer)
-		head    = headBuf.Bytes
-		body    = bodyBuf.Bytes
-		in      packet.IPacket
+		err error
+		in  []byte
 	)
 
 	defer func() {
@@ -103,26 +104,34 @@ func (a *Agent) handleLoop() {
 			log.Println("stack: ", string(debug.Stack()))
 		}
 
-		_ = a.Close()
-		headPool.Put(headBuf)
-		bodyPool.Put(bodyBuf)
-		if err != nil {
-			if err == io.EOF || onet.IsClosedConnError(err) {
-				//连接正常断开
-			} else {
-				log.Println(fmt.Errorf("[TcpServer] tcp_conn disconnected: %s", err.Error()))
-			}
-		}
+		a.safeReturn(err)
 	}()
 
 	for {
-		in, err = a.stream.Recv(head, body)
+		in, err = a.stream.Recv()
 		if err != nil {
 			return
 		}
 
-		if err = a.handleMsg(in); err != nil {
+		r := packet.Reader(in)
+		if err = a.handleMsg(r); err != nil {
 			return
+		}
+	}
+}
+
+func (a *Agent) safeReturn(err error) {
+	if a.stream != nil {
+		_ = a.stream.Close()
+	}
+	if a.conn != nil {
+		_ = a.conn.Close()
+	}
+	if err != nil {
+		if err == io.EOF || onet.IsClosedConnError(err) {
+			//连接正常断开
+		} else {
+			log.Println(fmt.Errorf("[TcpServer] tcp_conn disconnected: %s", err.Error()))
 		}
 	}
 }

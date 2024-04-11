@@ -2,7 +2,7 @@ package gateway
 
 import (
 	"context"
-	"github.com/orbit-w/golib/core/network"
+	"github.com/orbit-w/golib/modules/net/network"
 	"github.com/orbit-w/ogateway/app/gateway/agent"
 	okcp "github.com/orbit-w/ogateway/app/net/kcp"
 	"github.com/xtaci/kcp-go"
@@ -15,6 +15,12 @@ import (
    @File: server
    @2024 4月 周六 12:31
 */
+
+func init() {
+	regFactory(network.KCP, func() IServer {
+		return new(KcpServer)
+	})
+}
 
 type Stopper interface {
 	Stop() error
