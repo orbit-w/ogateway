@@ -6,6 +6,7 @@ import (
 	"github.com/orbit-w/golib/bases/packet"
 	"github.com/orbit-w/golib/modules/net/agent_stream"
 	gnetwork "github.com/orbit-w/golib/modules/net/network"
+	"github.com/orbit-w/ogateway/app/gateway/agent"
 	"github.com/orbit-w/ogateway/app/net/onet"
 	"github.com/orbit-w/ogateway/app/oconfig"
 	"github.com/spf13/viper"
@@ -44,6 +45,7 @@ func Test_Run(t *testing.T) {
 	flag.Parse()
 	oconfig.ParseConfig(*configPath)
 
+	//启动 gateway server
 	server, err := Serve()
 	if err != nil {
 		panic(err)
@@ -52,6 +54,7 @@ func Test_Run(t *testing.T) {
 		_ = server.Stop()
 	}()
 
+	//启动 agent_stream server
 	RunAgentStreamServer(func(stream agent_stream.IStream) error {
 		for {
 			in, err := stream.Recv()
@@ -59,15 +62,20 @@ func Test_Run(t *testing.T) {
 				break
 			}
 			fmt.Printf("agent_stream server recv: %s\n", string(in))
-			err = stream.Send([]byte("hello, client"))
+			w := packet.Writer()
+			w.WriteInt8(agent.PatternNone)
+			w.WriteString("hello, client")
+			err = stream.Send(w.Data())
 			if err != nil {
 				t.Error(err)
 			}
+			w.Return()
 		}
 		return nil
 	})
 
-	cli := NewClient(t)
+	//启动KCP客户端
+	cli := NewKCPClient(t)
 	defer func() {
 		_ = cli.Close()
 	}()
@@ -75,7 +83,7 @@ func Test_Run(t *testing.T) {
 	time.Sleep(time.Second * 30)
 }
 
-func NewClient(t *testing.T) net.Conn {
+func NewKCPClient(t *testing.T) net.Conn {
 	// 创建KCP客户端
 	conn, err := kcp.DialWithOptions(viper.GetString(oconfig.TagHost), nil, 10, 3)
 	assert.NoError(t, err)
@@ -102,7 +110,9 @@ func NewClient(t *testing.T) net.Conn {
 				break
 			}
 
-			fmt.Println("Received from server: ", string(in.Remain()))
+			ret, err := in.ReadBytes()
+			assert.NoError(t, err)
+			fmt.Println("Received from server: ", string(ret))
 		}
 	}()
 

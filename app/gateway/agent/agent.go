@@ -113,9 +113,26 @@ func (a *Agent) handleLoop() {
 		}
 
 		r := packet.Reader(in)
-		if err = a.handleMsg(r); err != nil {
+		if err = a.handleRespMsg(r); err != nil {
 			return
 		}
+	}
+}
+
+func (a *Agent) handleRespMsg(in packet.IPacket) error {
+	defer in.Return()
+	p, err := in.ReadInt8()
+	if err != nil {
+		return err
+	}
+
+	switch p {
+	case PatternNone:
+		return a.sender.Send(in.Remain())
+	case PatternKick:
+		return a.Close()
+	default:
+		return AgentDecodePatternErr(p)
 	}
 }
 
@@ -133,9 +150,4 @@ func (a *Agent) safeReturn(err error) {
 			log.Println(fmt.Errorf("[TcpServer] tcp_conn disconnected: %s", err.Error()))
 		}
 	}
-}
-
-func (a *Agent) handleMsg(in packet.IPacket) error {
-	defer in.Return()
-	return a.sender.Send(in.Data())
 }

@@ -18,12 +18,12 @@ func Serve() (IServer, error) {
 
 	protocol := parseProtocol(p)
 	factory := getFactory(protocol)
-	server := factory()
-	if err := server.Serve(host); err != nil {
+	s := factory()
+	if err := s.Serve(host); err != nil {
 		return nil, err
 	}
 
-	return server, nil
+	return s, nil
 }
 
 type IServer interface {
