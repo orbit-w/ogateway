@@ -22,12 +22,12 @@ func main() {
 
 	oconfig.ParseConfig(*configPath)
 
-	server, err := gateway.Serve()
+	stopper, err := gateway.Serve()
 	if err != nil {
 		panic(err)
 	}
 	defer func() {
-		_ = server.Stop()
+		stopper()
 	}()
 
 	// Wait for exit signal

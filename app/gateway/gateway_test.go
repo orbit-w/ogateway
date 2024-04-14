@@ -9,7 +9,6 @@ import (
 	"github.com/orbit-w/ogateway/app/gateway/agent"
 	"github.com/orbit-w/ogateway/app/net/onet"
 	"github.com/orbit-w/ogateway/app/oconfig"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/xtaci/kcp-go"
 	"io"
@@ -46,12 +45,12 @@ func Test_Run(t *testing.T) {
 	oconfig.ParseConfig(*configPath)
 
 	//启动 gateway server
-	server, err := Serve()
+	stopper, err := Serve()
 	if err != nil {
 		panic(err)
 	}
 	defer func() {
-		_ = server.Stop()
+		stopper()
 	}()
 
 	//启动 agent_stream server
@@ -85,7 +84,8 @@ func Test_Run(t *testing.T) {
 
 func NewKCPClient(t *testing.T) net.Conn {
 	// 创建KCP客户端
-	conn, err := kcp.DialWithOptions(viper.GetString(oconfig.TagHost), nil, 10, 3)
+	host := joinHost()
+	conn, err := kcp.DialWithOptions(host, nil, 10, 3)
 	assert.NoError(t, err)
 
 	// 向服务器发送数据

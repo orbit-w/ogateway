@@ -7,7 +7,8 @@ import (
 
 const (
 	TagProtocol = "protocol"
-	TagHost     = "host"
+	TagIp       = "ip"
+	TagPort     = "port"
 )
 
 var (
@@ -26,6 +27,10 @@ func ParseConfig(path string) {
 
 	if p := viper.GetString(TagProtocol); p != "" {
 		protocol = p
+	}
+
+	if tp := viper.GetString(TagPort); tp == "" {
+		viper.Set(TagPort, "8900")
 	}
 }
 

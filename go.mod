@@ -3,10 +3,11 @@ module github.com/orbit-w/ogateway
 go 1.20
 
 require (
-	github.com/orbit-w/golib v1.0.11-0.20240411070430-1c8120d5d4c7
+	github.com/orbit-w/golib v1.0.11-0.20240412151835-304d14999e40
 	github.com/spf13/viper v1.18.2
 	github.com/stretchr/testify v1.8.4
 	github.com/xtaci/kcp-go v5.4.20+incompatible
+	go.uber.org/zap v1.26.0
 )
 
 require (
@@ -39,5 +40,6 @@ require (
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

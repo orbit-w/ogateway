@@ -2,13 +2,13 @@ package agent
 
 import (
 	"fmt"
+	"github.com/orbit-w/golib/bases/misc/utils"
 	"github.com/orbit-w/golib/bases/packet"
 	"github.com/orbit-w/golib/modules/net/agent_stream"
 	"github.com/orbit-w/ogateway/app/net/onet"
 	"io"
 	"log"
 	"net"
-	"runtime/debug"
 	"sync/atomic"
 )
 
@@ -97,12 +97,8 @@ func (a *Agent) handleLoop() {
 		in  []byte
 	)
 
+	utils.RecoverPanic()
 	defer func() {
-		if r := recover(); r != nil {
-			log.Println(r)
-			log.Println("stack: ", string(debug.Stack()))
-		}
-
 		a.safeReturn(err)
 	}()
 
