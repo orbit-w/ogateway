@@ -3,6 +3,7 @@ package onet
 import (
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -18,6 +19,14 @@ func IsClosedConnError(err error) bool {
 		`mux: listener closed` (cmux.ErrListenerClosed)
 	*/
 	return err != nil && strings.Contains(err.Error(), "closed")
+}
+
+func IsEOFError(err error) bool {
+	return err == io.EOF
+}
+
+func IsCancelError(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "context canceled")
 }
 
 func ExceedMaxIncomingPacket(size uint32) error {

@@ -7,7 +7,6 @@ import (
 	"github.com/orbit-w/ogateway/app/logger"
 	"github.com/orbit-w/ogateway/app/net/onet"
 	"go.uber.org/zap"
-	"io"
 	"net"
 	"sync/atomic"
 )
@@ -141,10 +140,13 @@ func (a *Agent) safeReturn(err error) {
 		_ = a.conn.Close()
 	}
 	if err != nil {
-		if err == io.EOF || onet.IsClosedConnError(err) {
+		switch {
+		case onet.IsEOFError(err),
+			onet.IsClosedConnError(err),
+			onet.IsCancelError(err):
 			//连接正常断开
 			logger.ZLogger().Info("[Agent] connection closed", zap.Uint64("agent_id", a.Idx), zap.String("remote_addr", a.conn.RemoteAddr().String()))
-		} else {
+		default:
 			logger.ZLogger().Error("[Agent] abnormal connection disconnection", zap.Error(err))
 		}
 	}
