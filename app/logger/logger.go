@@ -14,7 +14,7 @@ import (
 var gLogger *zap.Logger
 
 func InitLogger() {
-	gLogger = logger.New("o_gateway.log", zap.InfoLevel)
+	gLogger = logger.New("logs/o_gateway.log", zap.InfoLevel)
 }
 
 func StopLogger() {

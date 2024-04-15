@@ -4,8 +4,10 @@ import (
 	"context"
 	"github.com/orbit-w/golib/modules/net/network"
 	"github.com/orbit-w/ogateway/app/gateway/agent"
+	"github.com/orbit-w/ogateway/app/logger"
 	okcp "github.com/orbit-w/ogateway/app/net/kcp"
 	"github.com/xtaci/kcp-go"
+	"go.uber.org/zap"
 	"net"
 	"sync/atomic"
 )
@@ -42,6 +44,7 @@ func (kcpS *KcpServer) Serve(addr string) error {
 	server.Serve("kcp", listener, func(ctx context.Context, _conn net.Conn, maxIncomingPacket uint32, head, body []byte) {
 		idx := kcpS.Idx()
 		oAgent := agent.NewAgent(idx, _conn)
+
 		conn := okcp.NewKcpConn(_conn, oAgent, okcp.ConnOptions{
 			Ctx:               ctx,
 			MaxIncomingPacket: maxIncomingPacket,
@@ -52,6 +55,7 @@ func (kcpS *KcpServer) Serve(addr string) error {
 		}()
 
 		oAgent.BindSender(conn)
+		logger.ZLogger().Info("new kcp connection, binding agent", zap.Uint64("AgentId", idx), zap.String("RemoteAddr", _conn.RemoteAddr().String()))
 		conn.HandleLoop(head, body)
 	}, network.AcceptorOptions{
 		MaxIncomingPacket: MaxInPacketSize,

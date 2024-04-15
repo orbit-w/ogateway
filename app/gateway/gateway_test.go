@@ -28,7 +28,7 @@ var (
 	once             sync.Once
 	gs               *agent_stream.Server
 	configPath       = flag.String("config", "../../configs", "config file path")
-	streamServerHost = "127.0.0.1:9900"
+	streamServerHost = "127.0.0.1:8950"
 )
 
 func RunAgentStreamServer(handle func(stream agent_stream.IStream) error) {
@@ -74,7 +74,7 @@ func Test_Run(t *testing.T) {
 	})
 
 	//启动KCP客户端
-	cli := NewKCPClient(t)
+	cli := NewKCPClient(t, "127.0.0.1")
 	defer func() {
 		_ = cli.Close()
 	}()
@@ -82,9 +82,14 @@ func Test_Run(t *testing.T) {
 	time.Sleep(time.Second * 30)
 }
 
-func NewKCPClient(t *testing.T) net.Conn {
+func Test_RunClient(t *testing.T) {
+	NewKCPClient(t, "127.0.0.1")
+	time.Sleep(time.Second * 5)
+}
+
+func NewKCPClient(t *testing.T, ip string) net.Conn {
 	// 创建KCP客户端
-	host := joinHost()
+	host := joinHostP(ip, "8900")
 	conn, err := kcp.DialWithOptions(host, nil, 10, 3)
 	assert.NoError(t, err)
 
@@ -121,6 +126,9 @@ func NewKCPClient(t *testing.T) net.Conn {
 	out, err := codec.EncodeBody(w)
 	assert.NoError(t, err)
 	_, err = conn.Write(out.Data())
+	if err != nil {
+		panic(err.Error())
+	}
 	assert.NoError(t, err)
 	return conn
 }

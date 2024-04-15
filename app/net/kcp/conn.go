@@ -2,14 +2,14 @@ package okcp
 
 import (
 	"context"
-	"fmt"
+	"github.com/orbit-w/golib/bases/misc/utils"
 	"github.com/orbit-w/golib/bases/packet"
 	gnetwork "github.com/orbit-w/golib/modules/net/network"
+	"github.com/orbit-w/ogateway/app/logger"
 	"github.com/orbit-w/ogateway/app/net/onet"
+	"go.uber.org/zap"
 	"io"
-	"log"
 	"net"
-	"runtime/debug"
 	"sync/atomic"
 	"time"
 )
@@ -97,17 +97,15 @@ func (kc *KcpConn) HandleLoop(head, body []byte) {
 		data packet.IPacket
 	)
 
+	defer utils.RecoverPanic()
 	defer func() {
-		if r := recover(); r != nil {
-			log.Println(r)
-			log.Println("stack: ", string(debug.Stack()))
-		}
 		_ = kc.Close()
 		if err != nil {
 			if err == io.EOF || onet.IsClosedConnError(err) {
 				//连接正常断开
+				logger.ZLogger().Info("[KcpConn] connection disconnected", zap.String("remote_addr", kc.conn.RemoteAddr().String()))
 			} else {
-				log.Println(fmt.Errorf("[TcpServer] tcp_conn disconnected: %s", err.Error()))
+				logger.ZLogger().Error("[KcpConn] abnormal connection disconnection", zap.Error(err), zap.String("remote_addr", kc.conn.RemoteAddr().String()))
 			}
 		}
 	}()

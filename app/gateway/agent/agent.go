@@ -1,13 +1,13 @@
 package agent
 
 import (
-	"fmt"
 	"github.com/orbit-w/golib/bases/misc/utils"
 	"github.com/orbit-w/golib/bases/packet"
 	"github.com/orbit-w/golib/modules/net/agent_stream"
+	"github.com/orbit-w/ogateway/app/logger"
 	"github.com/orbit-w/ogateway/app/net/onet"
+	"go.uber.org/zap"
 	"io"
-	"log"
 	"net"
 	"sync/atomic"
 )
@@ -40,8 +40,9 @@ type Agent struct {
 
 func NewAgent(_Idx uint64, _conn net.Conn) *Agent {
 	return &Agent{
-		Idx:  _Idx,
-		conn: _conn,
+		Idx:        _Idx,
+		conn:       _conn,
+		remoteAddr: _conn.RemoteAddr().String(),
 	}
 }
 
@@ -76,7 +77,7 @@ func (a *Agent) Close() error {
 }
 
 func (a *Agent) dial() error {
-	cli := agent_stream.NewClient(a.remoteAddr)
+	cli := agent_stream.NewClient(agentStreamAddr)
 	stream, err := cli.Stream()
 	if err != nil {
 		return err
@@ -87,7 +88,7 @@ func (a *Agent) dial() error {
 }
 
 func (a *Agent) auth() error {
-	a.remoteAddr = remoteAddr
+	logger.ZLogger().Info("[Agent] authed", zap.Uint64("agent_id", a.Idx), zap.String("remote_addr", a.conn.RemoteAddr().String()))
 	return nil
 }
 
@@ -142,8 +143,9 @@ func (a *Agent) safeReturn(err error) {
 	if err != nil {
 		if err == io.EOF || onet.IsClosedConnError(err) {
 			//连接正常断开
+			logger.ZLogger().Info("[Agent] connection closed", zap.Uint64("agent_id", a.Idx), zap.String("remote_addr", a.conn.RemoteAddr().String()))
 		} else {
-			log.Println(fmt.Errorf("[TcpServer] tcp_conn disconnected: %s", err.Error()))
+			logger.ZLogger().Error("[Agent] abnormal connection disconnection", zap.Error(err))
 		}
 	}
 }
