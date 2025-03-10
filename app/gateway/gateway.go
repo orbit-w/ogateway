@@ -4,6 +4,7 @@ import (
 	gnetwork "github.com/orbit-w/golib/modules/net/network"
 	"github.com/orbit-w/ogateway/app/logger"
 	"github.com/orbit-w/ogateway/app/oconfig"
+	multiplexers "github.com/orbit-w/ogateway/lib/mux"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"net"
@@ -17,6 +18,9 @@ import (
 
 func Serve() (stopper func(), err error) {
 	logger.InitLogger()
+
+	multiplexers.InitMultiplexers(agentStreamAddr)
+
 	host := joinHost()
 	p := oconfig.Protocol()
 	protocol := parseProtocol(p)

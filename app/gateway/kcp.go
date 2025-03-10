@@ -28,6 +28,9 @@ type Stopper interface {
 	Stop() error
 }
 
+// KcpServer 当你使用kcp的时候，你必须设置Timeout，利用timeout保持连接的检测。
+// 因为kcp-go本身不提供keepalive/heartbeat的功能，当服务器宕机重启的时候，
+// 原有的连接没有任何异常，只会hang住，我们只能依靠Timeout避免hang住
 type KcpServer struct {
 	idIncr  atomic.Uint64
 	stopper Stopper

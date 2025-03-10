@@ -1,13 +1,15 @@
 module github.com/orbit-w/ogateway
 
-go 1.20
+go 1.22
 
 require (
 	github.com/orbit-w/golib v1.0.11-0.20240412151835-304d14999e40
-	github.com/spf13/viper v1.18.2
-	github.com/stretchr/testify v1.8.4
+	github.com/orbit-w/meteor v0.0.0-20250303104708-7e49482f30f6
+	github.com/orbit-w/mux-go v0.0.0-20250310160205-ad783c678fb1
+	github.com/spf13/viper v1.19.0
+	github.com/stretchr/testify v1.9.0
 	github.com/xtaci/kcp-go v5.4.20+incompatible
-	go.uber.org/zap v1.26.0
+	go.uber.org/zap v1.27.0
 )
 
 require (
@@ -18,7 +20,8 @@ require (
 	github.com/klauspost/reedsolomon v1.12.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
+	github.com/natefinch/lumberjack v2.0.0+incompatible // indirect
+	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
@@ -34,11 +37,11 @@ require (
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/xtaci/lossyconn v0.0.0-20200209145036-adba10fffc37 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
+	golang.org/x/crypto v0.29.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
-	golang.org/x/net v0.19.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/net v0.31.0 // indirect
+	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/text v0.20.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

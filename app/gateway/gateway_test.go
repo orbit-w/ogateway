@@ -83,41 +83,43 @@ func Test_Run(t *testing.T) {
 }
 
 func Test_RunClient(t *testing.T) {
-	NewKCPClient(t, "127.0.0.1")
-	time.Sleep(time.Second * 5)
+	conn := NewKCPClient(t, "127.0.0.1") //"47.120.6.89"
+	time.Sleep(time.Second * 10)
+	_ = conn.Close()
 }
 
 func NewKCPClient(t *testing.T, ip string) net.Conn {
 	// 创建KCP客户端
-	host := joinHostP(ip, "8900")
-	conn, err := kcp.DialWithOptions(host, nil, 10, 3)
+	host := joinHostP(ip, "9000")
+	conn, err := kcp.Dial(host)
 	assert.NoError(t, err)
 
 	// 向服务器发送数据
 	codec := gnetwork.NewCodec(gnetwork.MaxIncomingPacket, false, time.Second*60)
 
 	// 从服务器读取数据
-	var (
-		head = make([]byte, 4)
-		body = make([]byte, gnetwork.MaxIncomingPacket)
-		in   packet.IPacket
-	)
+	//var (
+	//	head = make([]byte, 4)
+	//	body = make([]byte, gnetwork.MaxIncomingPacket)
+	//	in   packet.IPacket
+	//)
 	go func() {
+		buf := make([]byte, 4096)
 		for {
-			in, err = codec.BlockDecodeBody(conn, head, body)
+			n, err := conn.Read(buf)
 			if err != nil {
 				if err == io.EOF || onet.IsClosedConnError(err) {
 					fmt.Println("Server closed the connection")
 					return
 				}
 
-				fmt.Printf("Error reading from server: %s", err.Error())
+				fmt.Printf("Error reading from server: %s\n", err.Error())
+				fmt.Println(err.Error())
+				fmt.Println("========")
+				fmt.Println(n)
+				fmt.Println("========")
 				break
 			}
-
-			ret, err := in.ReadBytes()
-			assert.NoError(t, err)
-			fmt.Println("Received from server: ", string(ret))
 		}
 	}()
 
@@ -125,10 +127,14 @@ func NewKCPClient(t *testing.T, ip string) net.Conn {
 	w.WriteBytes32([]byte("Hello KCP Server!")) // 写入数据
 	out, err := codec.EncodeBody(w)
 	assert.NoError(t, err)
-	_, err = conn.Write(out.Data())
+	if err = conn.SetWriteDeadline(time.Now().Add(time.Second * 2)); err != nil {
+		panic(err.Error())
+	}
+	n, err := conn.Write(out.Data())
 	if err != nil {
 		panic(err.Error())
 	}
+	fmt.Println(n)
 	assert.NoError(t, err)
 	return conn
 }

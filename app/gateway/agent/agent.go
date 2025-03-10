@@ -1,14 +1,17 @@
 package agent
 
 import (
+	"context"
+	muxgo "github.com/orbit-w/mux-go/multiplexers"
+	"github.com/orbit-w/ogateway/lib/mux"
+	"net"
+	"sync/atomic"
+
 	"github.com/orbit-w/golib/bases/misc/utils"
 	"github.com/orbit-w/golib/bases/packet"
-	"github.com/orbit-w/golib/modules/net/agent_stream"
 	"github.com/orbit-w/ogateway/app/logger"
 	"github.com/orbit-w/ogateway/app/net/onet"
 	"go.uber.org/zap"
-	"net"
-	"sync/atomic"
 )
 
 /*
@@ -32,9 +35,8 @@ type Agent struct {
 	remoteAddr string
 	state      atomic.Uint32
 	conn       net.Conn
-	cli        agent_stream.IStreamClient
 	sender     ISender
-	stream     agent_stream.IStream
+	stream     muxgo.IConn
 }
 
 func NewAgent(_Idx uint64, _conn net.Conn) *Agent {
@@ -76,12 +78,11 @@ func (a *Agent) Close() error {
 }
 
 func (a *Agent) dial() error {
-	cli := agent_stream.NewClient(agentStreamAddr)
-	stream, err := cli.Stream()
+	vc, err := multiplexers.Dial()
 	if err != nil {
 		return err
 	}
-	a.stream = stream
+	a.stream = vc
 	go a.handleLoop()
 	return nil
 }
@@ -103,7 +104,7 @@ func (a *Agent) handleLoop() {
 	}()
 
 	for {
-		in, err = a.stream.Recv()
+		in, err = a.stream.Recv(context.Background())
 		if err != nil {
 			return
 		}

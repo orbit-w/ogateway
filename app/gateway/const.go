@@ -9,3 +9,7 @@ package gateway
 const (
 	MaxInPacketSize = 1048576 //1MB
 )
+
+const (
+	agentStreamAddr = "127.0.0.1:8950"
+)

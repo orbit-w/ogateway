@@ -18,7 +18,3 @@ const (
 	PatternNone = iota
 	PatternKick
 )
-
-const (
-	agentStreamAddr = "127.0.0.1:8950"
-)
