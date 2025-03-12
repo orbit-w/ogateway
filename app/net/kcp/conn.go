@@ -2,16 +2,17 @@ package okcp
 
 import (
 	"context"
-	"github.com/orbit-w/golib/bases/misc/utils"
-	"github.com/orbit-w/golib/bases/packet"
-	gnetwork "github.com/orbit-w/golib/modules/net/network"
-	"github.com/orbit-w/ogateway/app/logger"
-	"github.com/orbit-w/ogateway/app/net/onet"
-	"go.uber.org/zap"
 	"io"
 	"net"
 	"sync/atomic"
 	"time"
+
+	"github.com/orbit-w/golib/bases/misc/utils"
+	gnetwork "github.com/orbit-w/meteor/modules/net/network"
+	"github.com/orbit-w/meteor/modules/net/packet"
+	"github.com/orbit-w/ogateway/app/logger"
+	"github.com/orbit-w/ogateway/app/net/onet"
+	"go.uber.org/zap"
 )
 
 /*
@@ -61,11 +62,11 @@ func NewKcpConn(_conn net.Conn, _agent IAgent, op ConnOptions) *KcpConn {
 }
 
 func (kc *KcpConn) Send(data []byte) error {
-	out, err := kc.codec.EncodeBodyRaw(data)
+	out, err := kc.codec.Encode(data, 0)
 	if err != nil {
 		return err
 	}
-	defer out.Return()
+	defer packet.Return(out)
 	if err = kc.conn.SetWriteDeadline(time.Now().Add(WriteTimeout)); err != nil {
 		return err
 	}
@@ -93,8 +94,7 @@ func (kc *KcpConn) OnClose() error {
 
 func (kc *KcpConn) HandleLoop(head, body []byte) {
 	var (
-		err  error
-		data packet.IPacket
+		err error
 	)
 
 	defer utils.RecoverPanic()
@@ -111,18 +111,19 @@ func (kc *KcpConn) HandleLoop(head, body []byte) {
 	}()
 
 	for {
-		data, err = kc.codec.BlockDecodeBody(kc.conn, head, body)
+		in, _, err := kc.codec.BlockDecodeBody(kc.conn, head, body)
 		if err != nil {
 			return
 		}
-		if err = kc.OnData(data); err != nil {
+		if err = kc.onData(in); err != nil {
 			return
 		}
 	}
 }
 
-func (kc *KcpConn) OnData(data packet.IPacket) error {
-	defer data.Return()
+func (kc *KcpConn) onData(in []byte) error {
+	data := packet.ReaderP(in)
+	defer packet.Return(data)
 	for len(data.Remain()) > 0 {
 		if bytes, err := data.ReadBytes32(); err == nil {
 			_ = kc.agent.Proxy(bytes)
