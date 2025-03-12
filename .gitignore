@@ -24,3 +24,5 @@ bin/
 /manifest/Makefile
 .vscode
 /test/logs
+/logs
+logs
