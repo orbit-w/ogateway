@@ -2,11 +2,9 @@ package main
 
 import (
 	"flag"
-	"github.com/orbit-w/ogateway/app/gateway"
+
+	"github.com/orbit-w/ogateway/app"
 	"github.com/orbit-w/ogateway/app/oconfig"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 /*
@@ -22,16 +20,5 @@ func main() {
 
 	oconfig.ParseConfig(*configPath)
 
-	stopper, err := gateway.Serve()
-	if err != nil {
-		panic(err)
-	}
-	defer func() {
-		stopper()
-	}()
-
-	// Wait for exit signal
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	<-sigs
+	app.Run()
 }

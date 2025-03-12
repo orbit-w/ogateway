@@ -1,7 +1,6 @@
 package oconfig
 
 import (
-	"fmt"
 	"github.com/spf13/viper"
 )
 
@@ -16,13 +15,12 @@ var (
 )
 
 func ParseConfig(path string) {
-	viper.SetConfigName("config") // 配置文件的名字（没有扩展名）
-	viper.SetConfigType("toml")   // 或者 viper.SetConfigType("TOML")
-	viper.AddConfigPath(path)     // 查找配置文件的路径
+	viper.SetConfigType("toml") // 或者 viper.SetConfigType("TOML")
+	viper.SetConfigFile(path)   // 查找配置文件的路径
 
 	// 尝试读取配置文件
 	if err := viper.ReadInConfig(); err != nil {
-		panic(fmt.Errorf("Fatal error config file, path: %s, err: %s \n", path, err.Error()))
+		panic(err)
 	}
 
 	if p := viper.GetString(TagProtocol); p != "" {

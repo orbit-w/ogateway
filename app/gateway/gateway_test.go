@@ -1,8 +1,15 @@
 package gateway
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"io"
+	"net"
+	"sync"
+	"testing"
+	"time"
+
 	"github.com/orbit-w/golib/bases/packet"
 	"github.com/orbit-w/golib/modules/net/agent_stream"
 	gnetwork "github.com/orbit-w/golib/modules/net/network"
@@ -11,11 +18,6 @@ import (
 	"github.com/orbit-w/ogateway/app/oconfig"
 	"github.com/stretchr/testify/assert"
 	"github.com/xtaci/kcp-go"
-	"io"
-	"net"
-	"sync"
-	"testing"
-	"time"
 )
 
 /*
@@ -50,7 +52,7 @@ func Test_Run(t *testing.T) {
 		panic(err)
 	}
 	defer func() {
-		stopper()
+		_ = stopper(context.Background())
 	}()
 
 	//启动 agent_stream server

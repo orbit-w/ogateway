@@ -2,10 +2,11 @@ package agent
 
 import (
 	"context"
-	muxgo "github.com/orbit-w/mux-go/multiplexers"
-	"github.com/orbit-w/ogateway/lib/mux"
 	"net"
 	"sync/atomic"
+
+	muxgo "github.com/orbit-w/mux-go/multiplexers"
+	multiplexers "github.com/orbit-w/ogateway/lib/mux"
 
 	"github.com/orbit-w/golib/bases/misc/utils"
 	"github.com/orbit-w/golib/bases/packet"
@@ -78,7 +79,8 @@ func (a *Agent) Close() error {
 }
 
 func (a *Agent) dial() error {
-	vc, err := multiplexers.Dial()
+	// Use the agent stream address from the gateway package
+	vc, err := multiplexers.Dial("127.0.0.1:8950")
 	if err != nil {
 		return err
 	}

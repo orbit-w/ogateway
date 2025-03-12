@@ -1,13 +1,15 @@
 package gateway
 
 import (
+	"context"
+	"net"
+
 	gnetwork "github.com/orbit-w/golib/modules/net/network"
 	"github.com/orbit-w/ogateway/app/logger"
 	"github.com/orbit-w/ogateway/app/oconfig"
 	multiplexers "github.com/orbit-w/ogateway/lib/mux"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
-	"net"
 )
 
 /*
@@ -16,10 +18,8 @@ import (
    @2024 3月 周日 17:54
 */
 
-func Serve() (stopper func(), err error) {
+func Serve() (stopper func(ctx context.Context) error, err error) {
 	logger.InitLogger()
-
-	multiplexers.InitMultiplexers(agentStreamAddr)
 
 	host := joinHost()
 	p := oconfig.Protocol()
@@ -33,11 +33,14 @@ func Serve() (stopper func(), err error) {
 
 	logger.ZLogger().Info("gateway listened...", zap.String("Port", viper.GetString(oconfig.TagPort)), zap.String("Protocol", p))
 
-	stopper = func() {
+	stopper = func(ctx context.Context) error {
+		multiplexers.CloseAll()
+
 		if err = s.Stop(); err != nil {
 			logger.ZLogger().Error("gateway stop error", zap.Error(err))
 		}
 		logger.StopLogger()
+		return nil
 	}
 
 	return stopper, nil
