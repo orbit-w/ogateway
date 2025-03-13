@@ -8,8 +8,8 @@ import (
 	muxgo "github.com/orbit-w/mux-go/multiplexers"
 	multiplexers "github.com/orbit-w/ogateway/lib/mux"
 
-	"github.com/orbit-w/golib/bases/misc/utils"
-	"github.com/orbit-w/golib/bases/packet"
+	"github.com/orbit-w/meteor/bases/misc/utils"
+	"github.com/orbit-w/meteor/modules/net/packet"
 	"github.com/orbit-w/ogateway/app/logger"
 	"github.com/orbit-w/ogateway/app/net/onet"
 	"go.uber.org/zap"
@@ -119,7 +119,7 @@ func (a *Agent) handleLoop() {
 }
 
 func (a *Agent) handleRespMsg(in packet.IPacket) error {
-	defer in.Return()
+	defer packet.Return(in)
 	p, err := in.ReadInt8()
 	if err != nil {
 		return err

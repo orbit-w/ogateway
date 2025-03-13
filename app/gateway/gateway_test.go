@@ -1,7 +1,6 @@
 package gateway
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -10,12 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/orbit-w/golib/bases/packet"
-	"github.com/orbit-w/golib/modules/net/agent_stream"
-	gnetwork "github.com/orbit-w/golib/modules/net/network"
-	"github.com/orbit-w/ogateway/app/gateway/agent"
+	"github.com/orbit-w/meteor/modules/net/packet"
+
+	gnetwork "github.com/orbit-w/meteor/modules/net/network"
 	"github.com/orbit-w/ogateway/app/net/onet"
-	"github.com/orbit-w/ogateway/app/oconfig"
 	"github.com/stretchr/testify/assert"
 	"github.com/xtaci/kcp-go"
 )
@@ -28,61 +25,9 @@ import (
 
 var (
 	once             sync.Once
-	gs               *agent_stream.Server
 	configPath       = flag.String("config", "../../configs", "config file path")
 	streamServerHost = "127.0.0.1:8950"
 )
-
-func RunAgentStreamServer(handle func(stream agent_stream.IStream) error) {
-	once.Do(func() {
-		gs = new(agent_stream.Server)
-		if err := gs.Serve(streamServerHost, handle); err != nil {
-			panic(err)
-		}
-	})
-}
-
-func Test_Run(t *testing.T) {
-	flag.Parse()
-	oconfig.ParseConfig(*configPath)
-
-	//启动 gateway server
-	stopper, err := Serve()
-	if err != nil {
-		panic(err)
-	}
-	defer func() {
-		_ = stopper(context.Background())
-	}()
-
-	//启动 agent_stream server
-	RunAgentStreamServer(func(stream agent_stream.IStream) error {
-		for {
-			in, err := stream.Recv()
-			if err != nil {
-				break
-			}
-			fmt.Printf("agent_stream server recv: %s\n", string(in))
-			w := packet.Writer()
-			w.WriteInt8(agent.PatternNone)
-			w.WriteString("hello, client")
-			err = stream.Send(w.Data())
-			if err != nil {
-				t.Error(err)
-			}
-			w.Return()
-		}
-		return nil
-	})
-
-	//启动KCP客户端
-	cli := NewKCPClient(t, "127.0.0.1")
-	defer func() {
-		_ = cli.Close()
-	}()
-
-	time.Sleep(time.Second * 30)
-}
 
 func Test_RunClient(t *testing.T) {
 	conn := NewKCPClient(t, "127.0.0.1") //"47.120.6.89"
@@ -125,10 +70,9 @@ func NewKCPClient(t *testing.T, ip string) net.Conn {
 		}
 	}()
 
-	w := packet.Writer()
+	w := packet.WriterP(1024)
 	w.WriteBytes32([]byte("Hello KCP Server!")) // 写入数据
-	out, err := codec.EncodeBody(w)
-	assert.NoError(t, err)
+	out := codec.EncodeBody(w.Data(), 0)
 	if err = conn.SetWriteDeadline(time.Now().Add(time.Second * 2)); err != nil {
 		panic(err.Error())
 	}

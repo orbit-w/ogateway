@@ -3,7 +3,6 @@ module github.com/orbit-w/ogateway
 go 1.22
 
 require (
-	github.com/orbit-w/golib v1.0.11-0.20240412151835-304d14999e40
 	github.com/orbit-w/meteor v0.0.0-20250303104708-7e49482f30f6
 	github.com/orbit-w/mux-go v0.0.0-20250312100652-8633b541f777
 	github.com/spf13/viper v1.19.0

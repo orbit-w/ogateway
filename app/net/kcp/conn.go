@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/orbit-w/golib/bases/misc/utils"
+	"github.com/orbit-w/meteor/bases/misc/utils"
 	gnetwork "github.com/orbit-w/meteor/modules/net/network"
 	"github.com/orbit-w/meteor/modules/net/packet"
 	"github.com/orbit-w/ogateway/app/logger"

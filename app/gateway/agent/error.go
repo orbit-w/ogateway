@@ -2,7 +2,8 @@ package agent
 
 import (
 	"errors"
-	"github.com/orbit-w/golib/bases/misc/utils"
+
+	"github.com/orbit-w/meteor/bases/misc/utils"
 )
 
 /*

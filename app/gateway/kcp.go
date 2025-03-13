@@ -2,14 +2,15 @@ package gateway
 
 import (
 	"context"
-	"github.com/orbit-w/golib/modules/net/network"
+	"net"
+	"sync/atomic"
+
+	gnetwork "github.com/orbit-w/meteor/modules/net/network"
 	"github.com/orbit-w/ogateway/app/gateway/agent"
 	"github.com/orbit-w/ogateway/app/logger"
 	okcp "github.com/orbit-w/ogateway/app/net/kcp"
 	"github.com/xtaci/kcp-go"
 	"go.uber.org/zap"
-	"net"
-	"sync/atomic"
 )
 
 /*
@@ -19,7 +20,7 @@ import (
 */
 
 func init() {
-	regFactory(network.KCP, func() IServer {
+	regFactory(gnetwork.KCP, func() IServer {
 		return new(KcpServer)
 	})
 }
@@ -43,24 +44,25 @@ func (kcpS *KcpServer) Serve(addr string) error {
 		panic(err)
 	}
 
-	server := new(network.Server)
-	server.Serve("kcp", listener, func(ctx context.Context, _conn net.Conn, maxIncomingPacket uint32, head, body []byte) {
+	server := new(gnetwork.Server)
+	server.Serve("kcp", listener, func(ctx context.Context, generic net.Conn, head, body []byte,
+		op *gnetwork.AcceptorOptions) {
 		idx := kcpS.Idx()
-		oAgent := agent.NewAgent(idx, _conn)
+		oAgent := agent.NewAgent(idx, generic)
 
-		conn := okcp.NewKcpConn(_conn, oAgent, okcp.ConnOptions{
+		conn := okcp.NewKcpConn(generic, oAgent, okcp.ConnOptions{
 			Ctx:               ctx,
-			MaxIncomingPacket: maxIncomingPacket,
-			ReadTimeout:       network.ReadTimeout,
+			MaxIncomingPacket: MaxInPacketSize,
+			ReadTimeout:       gnetwork.ReadTimeout,
 		})
 		defer func() {
 			_ = conn.Close()
 		}()
 
 		oAgent.BindSender(conn)
-		logger.ZLogger().Info("new kcp connection, binding agent", zap.Uint64("AgentId", idx), zap.String("RemoteAddr", _conn.RemoteAddr().String()))
+		logger.ZLogger().Info("new kcp connection, binding agent", zap.Uint64("AgentId", idx), zap.String("RemoteAddr", generic.RemoteAddr().String()))
 		conn.HandleLoop(head, body)
-	}, network.AcceptorOptions{
+	}, &gnetwork.AcceptorOptions{
 		MaxIncomingPacket: MaxInPacketSize,
 		IsGzip:            false,
 	})

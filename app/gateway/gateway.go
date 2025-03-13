@@ -4,7 +4,7 @@ import (
 	"context"
 	"net"
 
-	gnetwork "github.com/orbit-w/golib/modules/net/network"
+	gnetwork "github.com/orbit-w/meteor/modules/net/network"
 	"github.com/orbit-w/ogateway/app/logger"
 	"github.com/orbit-w/ogateway/app/oconfig"
 	multiplexers "github.com/orbit-w/ogateway/lib/mux"
@@ -19,7 +19,6 @@ import (
 */
 
 func Serve() (stopper func(ctx context.Context) error, err error) {
-	logger.InitLogger()
 
 	host := joinHost()
 	p := oconfig.Protocol()

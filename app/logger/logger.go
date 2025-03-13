@@ -1,8 +1,7 @@
 package logger
 
 import (
-	"github.com/orbit-w/golib/bases/logger"
-	"go.uber.org/zap"
+	mlog "github.com/orbit-w/meteor/modules/mlog"
 )
 
 /*
@@ -11,16 +10,20 @@ import (
    @2024 4月 周日 14:34
 */
 
-var gLogger *zap.Logger
+var logger = mlog.NewFileLogger(mlog.WithLevel("info"),
+	mlog.WithFormat("console"),
+	mlog.WithRotation(500, 7, 3, false),
+	mlog.WithInitialFields(map[string]any{"app": "content-moderation"}),
+	mlog.WithOutputPaths("logs/content-moderation.log"))
 
-func InitLogger() {
-	gLogger = logger.New("logs/o_gateway.log", zap.InfoLevel)
+func SetLogger(log *mlog.Logger) {
+	logger = log
+}
+
+func ZLogger() *mlog.Logger {
+	return logger
 }
 
 func StopLogger() {
-	logger.Stop(gLogger)
-}
-
-func ZLogger() *zap.Logger {
-	return gLogger
+	_ = logger.Sync()
 }
