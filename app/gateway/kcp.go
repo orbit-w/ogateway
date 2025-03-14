@@ -45,7 +45,7 @@ func (kcpS *KcpServer) Serve(addr string) error {
 	}
 
 	server := new(gnetwork.Server)
-	server.Serve("kcp", listener, func(ctx context.Context, generic net.Conn, head, body []byte,
+	server.Serve(gnetwork.KCP, listener, func(ctx context.Context, generic net.Conn, head, body []byte,
 		op *gnetwork.AcceptorOptions) {
 		idx := kcpS.Idx()
 		oAgent := agent.NewAgent(idx, generic)

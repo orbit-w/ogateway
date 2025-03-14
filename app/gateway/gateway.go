@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"fmt"
 	"net"
 
 	gnetwork "github.com/orbit-w/meteor/modules/net/network"
@@ -30,14 +31,42 @@ func Serve() (stopper func(ctx context.Context) error, err error) {
 		return nil, err
 	}
 
-	logger.ZLogger().Info("gateway listened...", zap.String("Port", viper.GetString(oconfig.TagPort)), zap.String("Protocol", p))
+	// Use structured logging with additional information
+	logger.ZLogger().Info("Gateway server started",
+		zap.String("host", host),
+		zap.String("protocol", p),
+		zap.String("stage", viper.GetString("stage")))
+
+	// Add command line output for better visibility
+	fmt.Println("Gateway server started")
 
 	stopper = func(ctx context.Context) error {
+		logger.ZLogger().Info("Gateway server stopping",
+			zap.String("host", host),
+			zap.String("protocol", p))
+
+		// Add command line output for better visibility
+		fmt.Println("Gateway server stopping...")
+
 		multiplexers.CloseAll()
 
 		if err = s.Stop(); err != nil {
-			logger.ZLogger().Error("gateway stop error", zap.Error(err))
+			logger.ZLogger().Error("Gateway server stop failed",
+				zap.Error(err),
+				zap.String("host", host),
+				zap.String("protocol", p))
+
+			// Add command line output for better visibility
+			fmt.Printf("Gateway server stop failed: %v\n", err)
+
+			return err
 		}
+
+		logger.ZLogger().Info("Gateway server stopped successfully")
+
+		// Add command line output for better visibility
+		fmt.Println("Gateway server stopped successfully")
+
 		logger.StopLogger()
 		return nil
 	}
@@ -48,11 +77,6 @@ func Serve() (stopper func(ctx context.Context) error, err error) {
 func joinHost() string {
 	ip := viper.GetString(oconfig.TagIp)
 	port := viper.GetString(oconfig.TagPort)
-	ipAddr := net.ParseIP(ip)
-	return net.JoinHostPort(ipAddr.String(), port)
-}
-
-func joinHostP(ip, port string) string {
 	ipAddr := net.ParseIP(ip)
 	return net.JoinHostPort(ipAddr.String(), port)
 }

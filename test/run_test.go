@@ -11,7 +11,7 @@ func Setup() {
 	app.Run()
 }
 
-func TestMain(t *testing.T) {
+func Test_Main(t *testing.T) {
 	oconfig.ParseConfig("../configs/config.toml")
 	Setup()
 }

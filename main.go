@@ -13,7 +13,7 @@ import (
    @2024 3月 周三 23:50
 */
 
-var configPath = flag.String("config", ".", "config file path")
+var configPath = flag.String("config", "./configs/config.toml", "config file path")
 
 func main() {
 	flag.Parse()

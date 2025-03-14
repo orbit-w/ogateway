@@ -1,11 +1,9 @@
-package gateway
+package test
 
 import (
-	"flag"
 	"fmt"
 	"io"
 	"net"
-	"sync"
 	"testing"
 	"time"
 
@@ -23,22 +21,16 @@ import (
    @2024 3月 周日 20:46
 */
 
-var (
-	once             sync.Once
-	configPath       = flag.String("config", "../../configs", "config file path")
-	streamServerHost = "127.0.0.1:8950"
-)
-
 func Test_RunClient(t *testing.T) {
 	conn := NewKCPClient(t, "127.0.0.1") //"47.120.6.89"
-	time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 30)
 	_ = conn.Close()
 }
 
 func NewKCPClient(t *testing.T, ip string) net.Conn {
 	// 创建KCP客户端
-	host := joinHostP(ip, "9000")
-	conn, err := kcp.Dial(host)
+	host := joinHostP(ip, "8900")
+	conn, err := kcp.DialWithOptions(host, nil, 10, 3)
 	assert.NoError(t, err)
 
 	// 向服务器发送数据
@@ -83,4 +75,9 @@ func NewKCPClient(t *testing.T, ip string) net.Conn {
 	fmt.Println(n)
 	assert.NoError(t, err)
 	return conn
+}
+
+func joinHostP(ip, port string) string {
+	ipAddr := net.ParseIP(ip)
+	return net.JoinHostPort(ipAddr.String(), port)
 }
