@@ -1,13 +1,14 @@
-package multiplexers
+package multiplexers_lib
 
 /*
    @Author: orbit-w
-   @File: mux.go
+   @File: mux_lib.go
    @2025 3月 周一 23:50
    @Update: 2025 3月 周二 22:21
 */
 
 import (
+	"context"
 	"errors"
 	"sync"
 
@@ -24,7 +25,7 @@ var (
 // Dial creates a new connection to the specified targetHost
 // If a multiplexer for this host doesn't exist, it will be created
 // This implements passive instantiation of multiplexers for multiple hosts
-func Dial(targetHost string) (multiplexers.IConn, error) {
+func Dial(targetHost string, ctx context.Context) (multiplexers.IConn, error) {
 	if targetHost == "" {
 		return nil, ErrHostNotSet
 	}
@@ -36,7 +37,7 @@ func Dial(targetHost string) (multiplexers.IConn, error) {
 		return nil, errors.New("failed to create multiplexer")
 	}
 
-	return mux.Dial()
+	return mux.Dial(ctx)
 }
 
 // Close closes the multiplexer for the specified host

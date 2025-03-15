@@ -3,8 +3,9 @@ module github.com/orbit-w/ogateway
 go 1.22
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/orbit-w/meteor v0.0.0-20250303104708-7e49482f30f6
-	github.com/orbit-w/mux-go v0.0.0-20250312100652-8633b541f777
+	github.com/orbit-w/mux-go v0.0.0-20250315033152-557ceb59f2b9
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	github.com/xtaci/kcp-go v5.4.20+incompatible
@@ -28,7 +29,7 @@ require (
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
-	github.com/spf13/cast v1.6.0 // indirect
+	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/templexxx/cpufeat v0.0.0-20180724012125-cef66df7f161 // indirect
@@ -42,6 +43,5 @@ require (
 	golang.org/x/sys v0.27.0 // indirect
 	golang.org/x/text v0.20.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

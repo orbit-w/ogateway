@@ -5,6 +5,7 @@ import (
 	"net"
 	"sync/atomic"
 
+	"github.com/orbit-w/mux-go/metadata"
 	muxgo "github.com/orbit-w/mux-go/multiplexers"
 	multiplexers "github.com/orbit-w/ogateway/lib/mux"
 
@@ -80,7 +81,12 @@ func (a *Agent) Close() error {
 
 func (a *Agent) dial() error {
 	// Use the agent stream address from the gateway package
-	vc, err := multiplexers.Dial("127.0.0.1:8950")
+	ctx := metadata.NewOutContext(context.Background(), map[string]any{
+		"uid":      a.Uuid,
+		"agent_id": a.Idx,
+	})
+
+	vc, err := multiplexers.Dial("127.0.0.1:8950", ctx)
 	if err != nil {
 		return err
 	}
@@ -90,6 +96,8 @@ func (a *Agent) dial() error {
 }
 
 func (a *Agent) auth() error {
+	a.Uuid = GenerateUniqueId()
+
 	logger.ZLogger().Info("[Agent] authed", zap.Uint64("agent_id", a.Idx), zap.String("remote_addr", a.conn.RemoteAddr().String()))
 	return nil
 }
