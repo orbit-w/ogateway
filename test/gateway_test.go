@@ -2,11 +2,12 @@ package test
 
 import (
 	"fmt"
-	"github.com/orbit-w/meteor/modules/net/packet"
 	"io"
 	"net"
 	"testing"
 	"time"
+
+	"github.com/orbit-w/meteor/modules/net/packet"
 
 	gnetwork "github.com/orbit-w/meteor/modules/net/network"
 	"github.com/orbit-w/ogateway/app/net/onet"
@@ -21,7 +22,7 @@ import (
 */
 
 func Test_RunClient(t *testing.T) {
-	conn := NewKCPClient(t, "127.0.0.1") //"47.120.6.89"
+	conn := NewKCPClient(t, "47.120.6.89") //"47.120.6.89"
 	time.Sleep(time.Minute * 30)
 	_ = conn.Close()
 }

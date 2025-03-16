@@ -8,7 +8,7 @@ import (
 	gnetwork "github.com/orbit-w/meteor/modules/net/network"
 	"github.com/orbit-w/ogateway/app/gateway/agent"
 	"github.com/orbit-w/ogateway/app/logger"
-	okcp "github.com/orbit-w/ogateway/app/net/kcp"
+	netconn "github.com/orbit-w/ogateway/app/net/conn"
 	"github.com/xtaci/kcp-go"
 	"go.uber.org/zap"
 )
@@ -50,7 +50,7 @@ func (kcpS *KcpServer) Serve(addr string) error {
 		idx := kcpS.Idx()
 		oAgent := agent.NewAgent(idx, generic)
 
-		conn := okcp.NewKcpConn(generic, oAgent, okcp.ConnOptions{
+		conn := netconn.GetFactory(gnetwork.KCP)(generic, oAgent, netconn.ConnOptions{
 			Ctx:               ctx,
 			MaxIncomingPacket: MaxInPacketSize,
 			ReadTimeout:       gnetwork.ReadTimeout,

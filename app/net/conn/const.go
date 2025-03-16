@@ -1,4 +1,4 @@
-package okcp
+package conn
 
 import "time"
 
