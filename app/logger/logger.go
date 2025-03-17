@@ -14,7 +14,7 @@ var logger = mlog.NewFileLogger(mlog.WithLevel("info"),
 	mlog.WithFormat("console"),
 	mlog.WithRotation(500, 7, 3, false),
 	mlog.WithInitialFields(map[string]any{"app": "content-moderation"}),
-	mlog.WithOutputPaths("logs/content-moderation.log"))
+	mlog.WithOutputPaths("logs/gateway.log"))
 
 func SetLogger(log *mlog.Logger) {
 	logger = log

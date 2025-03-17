@@ -55,6 +55,8 @@ github.com/orbit-w/meteor v0.0.0-20250303104708-7e49482f30f6 h1:OXvQAAoePU+esEcV
 github.com/orbit-w/meteor v0.0.0-20250303104708-7e49482f30f6/go.mod h1:aGCjgGNccb6ltr3g33itIAQczGXeCzWffDb5Wq2mtLE=
 github.com/orbit-w/mux-go v0.0.0-20250315033152-557ceb59f2b9 h1:IhJmCnOt6D+TGxfsYX54ptF6pZ7PcT9pcbr9/cBBc1o=
 github.com/orbit-w/mux-go v0.0.0-20250315033152-557ceb59f2b9/go.mod h1:cySP9Xln+56pyB2XUCTkXdfH2+bDI2uSydcOdR4OZO8=
+github.com/orbit-w/mux-go v0.0.0-20250317135428-0dea50065ed0 h1:YPBIhTWe33O6OFCxmIAeZiMkGHbNZzfXWvPmlrofcys=
+github.com/orbit-w/mux-go v0.0.0-20250317135428-0dea50065ed0/go.mod h1:cySP9Xln+56pyB2XUCTkXdfH2+bDI2uSydcOdR4OZO8=
 github.com/pelletier/go-toml/v2 v2.2.2 h1:aYUidT7k73Pcl9nb2gScu7NSrKCSHIDE89b3+6Wq+LM=
 github.com/pelletier/go-toml/v2 v2.2.2/go.mod h1:1t835xjRzz80PqgE6HHgN2JOsmgYu/h4qDAS4n929Rs=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

@@ -21,10 +21,28 @@ import (
    @2024 3月 周日 20:46
 */
 
-func Test_RunClient(t *testing.T) {
+func Test_RunKCPClient(t *testing.T) {
+
 	conn := NewKCPClient(t, "47.120.6.89") //"47.120.6.89"
-	time.Sleep(time.Minute * 30)
+	time.Sleep(time.Second * 30)
 	_ = conn.Close()
+}
+
+func Test_RunTCPClient(t *testing.T) {
+
+	conn := NewTCPClient(t, "127.0.0.1") //"47.120.6.89"
+	time.Sleep(time.Second * 30)
+	_ = conn.Close()
+}
+
+func NewTCPClient(t *testing.T, ip string) net.Conn {
+	// 创建TCP客户端
+	host := joinHostP(ip, "8900")
+	conn, err := net.Dial("tcp", host)
+	assert.NoError(t, err)
+
+	run(t, conn)
+	return conn
 }
 
 func NewKCPClient(t *testing.T, ip string) net.Conn {
@@ -33,16 +51,15 @@ func NewKCPClient(t *testing.T, ip string) net.Conn {
 	conn, err := kcp.DialWithOptions(host, nil, 10, 3)
 	assert.NoError(t, err)
 
+	run(t, conn)
+	return conn
+}
+
+func run(t *testing.T, conn net.Conn) {
 	// 向服务器发送数据
 	cliCodec := NewClientCodec()
 	codec := gnetwork.NewCodec(gnetwork.MaxIncomingPacket, false, 0)
 
-	// 从服务器读取数据
-	//var (
-	//	head = make([]byte, 4)
-	//	body = make([]byte, gnetwork.MaxIncomingPacket)
-	//	in   packet.IPacket
-	//)
 	go func() {
 		head := make([]byte, 4)
 		body := make([]byte, 4096)
@@ -84,7 +101,7 @@ func NewKCPClient(t *testing.T, ip string) net.Conn {
 	}()
 
 	pack := cliCodec.Encode([]byte("Hello KCP Server!"), 100, 10)
-	if err = conn.SetWriteDeadline(time.Now().Add(time.Second * 2)); err != nil {
+	if err := conn.SetWriteDeadline(time.Now().Add(time.Second * 2)); err != nil {
 		panic(err.Error())
 	}
 
@@ -99,7 +116,6 @@ func NewKCPClient(t *testing.T, ip string) net.Conn {
 	}
 	fmt.Println(n)
 	assert.NoError(t, err)
-	return conn
 }
 
 func joinHostP(ip, port string) string {

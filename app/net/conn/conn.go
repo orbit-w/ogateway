@@ -127,8 +127,11 @@ func (c *Conn) onData(in []byte) error {
 	data := packet.ReaderP(in)
 	defer packet.Return(data)
 	for len(data.Remain()) > 0 {
-		if bytes, err := data.ReadBytes32(); err == nil {
+		bytes, err := data.ReadBytes32()
+		if err == nil {
 			_ = c.agent.Proxy(bytes)
+		} else {
+			logger.ZLogger().Error("[Conn] read data failed", zap.Error(err))
 		}
 	}
 	return nil
