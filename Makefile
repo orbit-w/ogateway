@@ -26,4 +26,3 @@ BuildPackageLinux:
 		cp configs/config.toml package/config.toml; \
 	fi
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o package/$(APP_NAME) main.go
-	cp configs/config.toml package/
