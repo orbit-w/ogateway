@@ -30,7 +30,7 @@ func Test_RunKCPClient(t *testing.T) {
 
 func Test_RunTCPClient(t *testing.T) {
 
-	conn := NewTCPClient(t, "127.0.0.1") //"47.120.6.89"
+	conn := NewTCPClient(t, "47.120.6.89") //"47.120.6.89"
 	time.Sleep(time.Second * 30)
 	_ = conn.Close()
 }
