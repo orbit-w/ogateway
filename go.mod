@@ -3,8 +3,8 @@ module github.com/orbit-w/ogateway
 go 1.21.0
 
 require (
-	github.com/orbit-w/meteor v0.0.0-20250318125127-fb0485fec77e
-	github.com/orbit-w/mux-go v0.0.0-20250318134344-494e34299713
+	github.com/orbit-w/meteor v0.0.0-20250330074908-5ee1edecdf27
+	github.com/orbit-w/mux-go v0.0.0-20250330080341-4434feaa0de6
 	github.com/spf13/viper v1.20.0
 	github.com/stretchr/testify v1.10.0
 	github.com/xtaci/kcp-go v5.4.20+incompatible
