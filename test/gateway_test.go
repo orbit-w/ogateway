@@ -2,6 +2,8 @@ package test
 
 import (
 	"fmt"
+	"github.com/orbit-w/ogateway/test/pb"
+	"google.golang.org/protobuf/proto"
 	"io"
 	"net"
 	"testing"
@@ -31,7 +33,7 @@ func Test_RunKCPClient(t *testing.T) {
 func Test_RunTCPClient(t *testing.T) {
 
 	conn := NewTCPClient(t, "47.120.6.89") //"47.120.6.89"
-	time.Sleep(time.Second * 30)
+	time.Sleep(time.Minute * 30)
 	_ = conn.Close()
 }
 
@@ -92,15 +94,24 @@ func run(t *testing.T, conn net.Conn) {
 
 			// 处理解码后的消息
 			for _, msg := range messages {
+				rsp := new(pb.Request_SearchBook_Rsp)
+				if err := proto.Unmarshal(msg.Data, rsp); err != nil {
+					fmt.Println(err)
+				}
 				fmt.Printf("Received message - PID: %d, Seq: %d, Data length: %d, Content: %s\n",
-					msg.Pid, msg.Seq, len(msg.Data), string(msg.Data))
+					msg.Pid, msg.Seq, len(msg.Data), rsp.Result.Content)
 				// 这里可以根据不同的协议ID处理不同类型的消息
 				// 例如: handleMessage(msg)
 			}
 		}
 	}()
 
-	pack := cliCodec.Encode([]byte("Hello KCP Server!"), 100, 10)
+	req, err := proto.Marshal(&pb.Request_SearchBook{
+		Query: "first",
+	})
+	assert.NoError(t, err)
+
+	pack := cliCodec.Encode(req, 100, pb.PID_Core_Request_SearchBook)
 	if err := conn.SetWriteDeadline(time.Now().Add(time.Second * 2)); err != nil {
 		panic(err.Error())
 	}

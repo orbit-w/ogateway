@@ -9,6 +9,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/xtaci/kcp-go v5.4.20+incompatible
 	go.uber.org/zap v1.27.0
+	google.golang.org/protobuf v1.36.1
 )
 
 require (
