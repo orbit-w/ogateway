@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/orbit-w/ogateway/test/pb"
+	"github.com/orbit-w/ogateway/test/pb/pb_core"
 	"google.golang.org/protobuf/proto"
 	"io"
 	"net"
@@ -94,7 +95,7 @@ func run(t *testing.T, conn net.Conn) {
 
 			// 处理解码后的消息
 			for _, msg := range messages {
-				rsp := new(pb.Request_SearchBook_Rsp)
+				rsp := new(pb_core.Request_SearchBook_Rsp)
 				if err := proto.Unmarshal(msg.Data, rsp); err != nil {
 					fmt.Println(err)
 				}
@@ -106,7 +107,7 @@ func run(t *testing.T, conn net.Conn) {
 		}
 	}()
 
-	req, err := proto.Marshal(&pb.Request_SearchBook{
+	req, err := proto.Marshal(&pb_core.Request_SearchBook{
 		Query: "first",
 	})
 	assert.NoError(t, err)
